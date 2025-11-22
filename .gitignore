@@ -1,0 +1,23 @@
+# Terraform local files
+.terraform/
+*.tfstate
+*.tfstate.backup
+crash.log
+crash.*.log
+terraform.tfvars
+terraform.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Python / venv
+__pycache__/
+.venv/
+
+# MacOS
+.DS_Store
+
+# Secrets / local env
+.env
+
