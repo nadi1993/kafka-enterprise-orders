@@ -1,3 +1,53 @@
+            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/payment-service:latest
+
+      - name: Build & push analytics-service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./consumers/analytics-service
+          push: true
+          tags: |
+            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
+
+  terraform:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # ПРИМЕЧАНИЕ: apply может создавать платные ресурсы.
+      # Пока оставим закомментированным, чтобы случайно не потратить деньги.
+      # Когда будешь готова — убери #.
+      #
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform apply -auto-approve tfplan
 name: CI-CD
 
 on:
