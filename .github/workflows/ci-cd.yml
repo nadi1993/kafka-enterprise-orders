@@ -2,17 +2,11 @@ name: CI-CD
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
 
 env:
+  GHCR_REGISTRY: ghcr.io
   AWS_REGION: us-east-1
   TF_WORKING_DIR: infra/terraform
-  GHCR_REGISTRY: ghcr.io
 
 jobs:
   build-and-push:
@@ -33,70 +27,68 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push order-producer image
-        uses: docker/build-push-action@v6
+      - name: Build and push producer image
+        uses: docker/build-push-action@v5
         with:
           context: ./producer
           push: true
           tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/order-producer:latest
+            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/producer:latest
 
-      - name: Build & push fraud-service image
-        uses: docker/build-push-action@v6
+      - name: Build and push fraud-service image
+        uses: docker/build-push-action@v5
         with:
           context: ./consumers/fraud-service
           push: true
           tags: |
             ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/fraud-service:latest
 
-      - name: Build & push payment-service image
-        uses: docker/build-push-action@v6
+      - name: Build and push payment-service image
+        uses: docker/build-push-action@v5
         with:
           context: ./consumers/payment-service
           push: true
           tags: |
             ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/payment-service:latest
 
-      - name: Build & push analytics-service image
-        uses: docker/build-push-action@v6
+      - name: Build and push analytics-service image
+        uses: docker/build-push-action@v5
         with:
           context: ./consumers/analytics-service
           push: true
           tags: |
-      
-      terraform:
-  if: false
-  needs: build-and-push
-  runs-on: ubuntu-latest
+            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
 
-  permissions:
-    id-token: write
-    contents: read
+  terraform:
+    if: false
+    needs: build-and-push
+    runs-on: ubuntu-latest
 
-  defaults:
-    run:
-      working-directory: ${{ env.TF_WORKING_DIR }}
+    permissions:
+      id-token: write
+      contents: read
 
-  steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
 
-    - name: Configure AWS credentials (OIDC)
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: ${{ env.AWS_REGION }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.7.5
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Terraform Init
-      run: terraform init
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
 
-    - name: Terraform Plan
-      run: terraform plan -out=tfplan
+      - name: Terraform Init
+        run: terraform init
 
-  
-
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
