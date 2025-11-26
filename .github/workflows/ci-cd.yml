@@ -1,65 +1,18 @@
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/payment-service:latest
-
-      - name: Build & push analytics-service image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./consumers/analytics-service
-          push: true
-          tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
-
-  terraform:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
-
-    defaults:
-      run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
-      # ПРИМЕЧАНИЕ: apply может создавать платные ресурсы.
-      # Пока оставим закомментированным, чтобы случайно не потратить деньги.
-      # Когда будешь готова — убери #.
-      #
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main'
-      #   run: terraform apply -auto-approve tfplan
 name: CI-CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: us-east-1
   TF_WORKING_DIR: infra/terraform
   GHCR_REGISTRY: ghcr.io
-  PROJECT_NAME: kafka-enterprise-orders
 
 jobs:
   build-and-push:
@@ -112,14 +65,6 @@ jobs:
           tags: |
             ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
 
-      - name: Export image tags
-        id: images
-        run: |
-          echo "producer=${{ env.GHCR_REGISTRY }}/${{ github.repository }}/order-producer:latest" >> $GITHUB_OUTPUT
-          echo "fraud=${{ env.GHCR_REGISTRY }}/${{ github.repository }}/fraud-service:latest" >> $GITHUB_OUTPUT
-          echo "payment=${{ env.GHCR_REGISTRY }}/${{ github.repository }}/payment-service:latest" >> $GITHUB_OUTPUT
-          echo "analytics=${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest" >> $GITHUB_OUTPUT
-
   terraform:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -127,6 +72,10 @@ jobs:
     permissions:
       id-token: write
       contents: read
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
 
     steps:
       - name: Checkout repo
@@ -141,37 +90,16 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.5
+          terraform_version: 1.7.5
 
       - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
       - name: Terraform Plan
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          TF_VAR_aws_region: ${{ env.AWS_REGION }}
-          TF_VAR_container_image_producer: ${{ needs.build-and-push.outputs.producer }}
-          TF_VAR_container_image_fraud: ${{ needs.build-and-push.outputs.fraud }}
-          TF_VAR_container_image_payment: ${{ needs.build-and-push.outputs.payment }}
-          TF_VAR_container_image_analytics: ${{ needs.build-and-push.outputs.analytics }}
-          TF_VAR_confluent_bootstrap_servers: ${{ secrets.CONFLUENT_BOOTSTRAP_SERVERS }}
-          TF_VAR_confluent_api_key: ${{ secrets.CONFLUENT_API_KEY }}
-          TF_VAR_confluent_api_secret: ${{ secrets.CONFLUENT_API_SECRET }}
-          TF_VAR_rds_password: ${{ secrets.RDS_PASSWORD }}
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          TF_VAR_aws_region: ${{ env.AWS_REGION }}
-          TF_VAR_container_image_producer: ${{ needs.build-and-push.outputs.producer }}
-          TF_VAR_container_image_fraud: ${{ needs.build-and-push.outputs.fraud }}
-          TF_VAR_container_image_payment: ${{ needs.build-and-push.outputs.payment }}
-          TF_VAR_container_image_analytics: ${{ needs.build-and-push.outputs.analytics }}
-          TF_VAR_confluent_bootstrap_servers: ${{ secrets.CONFLUENT_BOOTSTRAP_SERVERS }}
-          TF_VAR_confluent_api_key: ${{ secrets.CONFLUENT_API_KEY }}
-          TF_VAR_confluent_api_secret: ${{ secrets.CONFLUENT_API_SECRET }}
-          TF_VAR_rds_password: ${{ secrets.RDS_PASSWORD }}
-        run: terraform apply -auto-approve tfplan
+      # Пока не включаем apply, чтобы не тратить деньги случайно
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform apply -auto-approve tfplan
+
