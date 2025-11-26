@@ -2,10 +2,11 @@ name: CI-CD
 
 on:
   push:
+    branches:
+      - main
 
 env:
   GHCR_REGISTRY: ghcr.io
-  AWS_REGION: us-east-1
   TF_WORKING_DIR: infra/terraform
 
 jobs:
@@ -17,7 +18,7 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Log in to GitHub Container Registry
@@ -57,38 +58,4 @@ jobs:
           context: ./consumers/analytics-service
           push: true
           tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
-
-  terraform:
-    if: false
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
-
-    defaults:
-      run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
+            ${{ env.GHCR_RE_
