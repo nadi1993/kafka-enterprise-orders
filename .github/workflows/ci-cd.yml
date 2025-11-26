@@ -65,46 +65,33 @@ jobs:
           tags: |
             ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
 
-  terraform:terraform:
+  terraform:
   if: false
-  needs: build-and-push
-  runs-on: ubuntu-latest
-  ...
-
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    permissions:
+needs: build-and-push 
+runs-on: ubuntu-latest
+permissions:
       id-token: write
-      contents: read
-
-    defaults:
+      contents: read 
+      defaults:
       run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
+        working-directory: ${{ env.TF_WORKING_DIR }} 
+        steps:- name: Checkout repo
+        uses: actions/checkout@v4 
+      -name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }} 
+          -name: Setup Terraform 
+          uses: hashicorp/setup-terraform@v3
+          with:
+          terraform_version: 1.7.5  
+             -name:Terraform Init
+              run:terraform init  
+              -name:Terraform Plan run:
+              terraform plan -out=tfplan
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
-      # Пока не включаем apply, чтобы не тратить деньги случайно
-      # - name: Terraform Apply
+      
       #   if: github.ref == 'refs/heads/main'
       #   run: terraform apply -auto-approve tfplan
 
