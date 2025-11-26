@@ -58,4 +58,27 @@ jobs:
           context: ./consumers/analytics-service
           push: true
           tags: |
-            ${{ env.GHCR_RE_
+            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
+
+  terraform:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
