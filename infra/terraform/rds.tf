@@ -1,13 +1,25 @@
-resource "aws_security_group" "db_sg" {
-  name        = "${var.project_name}-db-sg"
-  description = "Allow Postgres"
+resource "aws_db_subnet_group" "main" {
+  name = "${local.project_name}-db-subnet-group"
+  subnet_ids = [
+    aws_subnet.public_a.id,
+    aws_subnet.public_b.id,
+  ]
+
+  tags = {
+    Name = "${local.project_name}-db-subnet-group"
+  }
+}
+
+resource "aws_security_group" "db" {
+  name        = "${local.project_name}-db-sg"
+  description = "Allow Postgres access"
   vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   egress {
@@ -18,37 +30,29 @@ resource "aws_security_group" "db_sg" {
   }
 
   tags = {
-    Name = "${var.project_name}-db-sg"
-  }
-}
-
-resource "aws_db_subnet_group" "db_subnets" {
-  name       = "${var.project_name}-db-subnets"
-  subnet_ids = [aws_subnet.public.id]
-
-  tags = {
-    Name = "${var.project_name}-db-subnet-group"
+    Name = "${local.project_name}-db-sg"
   }
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier        = "${var.project_name}-db"
+  identifier        = "${local.project_name}-postgres"
   engine            = "postgres"
-  engine_version    = "15.3"
+  engine_version    = "17.6"
   instance_class    = "db.t3.micro"
   allocated_storage = 20
 
-  username = var.db_username
-  password = var.db_password
+  username = "orders_user"
+  password = var.rds_password
 
-  db_subnet_group_name   = aws_db_subnet_group.db_subnets.name
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  db_name              = "orders_db"
+  db_subnet_group_name = aws_db_subnet_group.main.name
+  skip_final_snapshot  = true
+  publicly_accessible  = true
 
-  skip_final_snapshot = true
-  publicly_accessible = true
+  vpc_security_group_ids = [aws_security_group.db.id]
 
   tags = {
-    Name = "${var.project_name}-postgres"
+    Name = "${local.project_name}-postgres"
   }
 }
 

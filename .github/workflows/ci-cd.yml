@@ -2,22 +2,17 @@ name: CI-CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
-  workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-1
-  TF_WORKING_DIR: infra/terraform
+  AWS_REGION: us-east-2
   GHCR_REGISTRY: ghcr.io
+  TF_WORKING_DIR: infra/terraform
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
@@ -33,73 +28,80 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push order-producer image
+      - name: Build & push order-producer
         uses: docker/build-push-action@v6
         with:
           context: ./producer
           push: true
           tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/order-producer:latest
+            ghcr.io/${{ github.repository }}/order-producer:latest
 
-      - name: Build & push fraud-service image
+      - name: Build & push fraud-service
         uses: docker/build-push-action@v6
         with:
           context: ./consumers/fraud-service
           push: true
           tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/fraud-service:latest
+            ghcr.io/${{ github.repository }}/fraud-service:latest
 
-      - name: Build & push payment-service image
+      - name: Build & push payment-service
         uses: docker/build-push-action@v6
         with:
           context: ./consumers/payment-service
           push: true
           tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/payment-service:latest
+            ghcr.io/${{ github.repository }}/payment-service:latest
 
-      - name: Build & push analytics-service image
+      - name: Build & push analytics-service
         uses: docker/build-push-action@v6
         with:
           context: ./consumers/analytics-service
           push: true
           tags: |
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository }}/analytics-service:latest
+            ghcr.io/${{ github.repository }}/analytics-service:latest
 
   terraform:
     needs: build-and-push
     runs-on: ubuntu-latest
-
     permissions:
-      id-token: write
       contents: read
-
-    defaults:
-      run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.7.5
+          terraform_version: 1.9.5
 
       - name: Terraform Init
-        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -input=false
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_rds_password: ${{ secrets.RDS_PASSWORD }}
+          TF_VAR_confluent_bootstrap_servers: ${{ secrets.CONFLUENT_BOOTSTRAP_SERVERS }}
+          TF_VAR_confluent_api_key: ${{ secrets.CONFLUENT_API_KEY }}
+          TF_VAR_confluent_api_secret: ${{ secrets.CONFLUENT_API_SECRET }}
+        run: terraform plan -input=false
 
-      # Пока не включаем apply, чтобы не тратить деньги случайно
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main'
-      #   run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_rds_password: ${{ secrets.RDS_PASSWORD }}
+          TF_VAR_confluent_bootstrap_servers: ${{ secrets.CONFLUENT_BOOTSTRAP_SERVERS }}
+          TF_VAR_confluent_api_key: ${{ secrets.CONFLUENT_API_KEY }}
+          TF_VAR_confluent_api_secret: ${{ secrets.CONFLUENT_API_SECRET }}
+        run: terraform apply -auto-approve -input=false
 

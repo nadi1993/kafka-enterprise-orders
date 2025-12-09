@@ -1,0 +1,12 @@
+aws_region   = "us-east-2"
+project_name = "kafka-enterprise-orders"
+
+confluent_api_key           = "test-key"
+confluent_api_secret        = "test-secret"
+confluent_bootstrap_servers = "test-bootstrap"
+
+container_image_producer   = "ghcr.io/OWNER/REPO/order-producer:latest"
+container_image_payment    = "ghcr.io/OWNER/REPO/payment-service:latest"
+container_image_fraud      = "ghcr.io/OWNER/REPO/fraud-service:latest"
+container_image_analytics  = "ghcr.io/OWNER/REPO/analytics-service:latest"
+
