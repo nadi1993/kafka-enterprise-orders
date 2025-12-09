@@ -1,5 +1,5 @@
 variable "aws_region" {
-  description = "AWS region to deploy into"
+  description = "AWS region to deploy resources"
   type        = string
   default     = "us-east-2"
 }
@@ -36,21 +36,24 @@ variable "rds_password" {
 variable "container_image_producer" {
   description = "Docker image for order-producer"
   type        = string
+  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/order-producer:latest"
 }
 
 variable "container_image_payment" {
   description = "Docker image for payment-service"
   type        = string
+  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/payment-service:latest"
 }
 
 variable "container_image_fraud" {
   description = "Docker image for fraud-service"
   type        = string
+  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/fraud-service:latest"
 }
 
 variable "container_image_analytics" {
-  description = "Docker image for analytics-service (на будущее)"
+  description = "Docker image for analytics-service"
   type        = string
-  default     = "ghcr.io/OWNER/REPO/analytics-service:latest"
+  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/analytics-service:latest"
 }
 
