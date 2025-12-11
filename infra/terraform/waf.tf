@@ -2,7 +2,9 @@ resource "aws_wafv2_web_acl" "webapp" {
   name  = "${var.project_name}-waf"
   scope = "REGIONAL"
 
-  default_action { allow {} }
+  default_action {
+    allow {}
+  }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
@@ -13,7 +15,10 @@ resource "aws_wafv2_web_acl" "webapp" {
   rule {
     name     = "AWS-Common"
     priority = 1
-    override_action { none {} }
+
+    override_action {
+      none {}
+    }
 
     statement {
       managed_rule_group_statement {
