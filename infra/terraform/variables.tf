@@ -1,19 +1,18 @@
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
-  default     = "us-east-2"
+  default     = "us-west-2"
 }
 
 variable "project_name" {
-  description = "Project name prefix"
+  description = "Base name used for all resources"
   type        = string
-  default     = "kafka-enterprise-orders"
+  default     = "kafka-enterprise-orders-nadi-2025"
 }
 
 variable "confluent_api_key" {
   description = "Confluent Cloud API key"
   type        = string
-  sensitive   = true
 }
 
 variable "confluent_api_secret" {
@@ -28,32 +27,28 @@ variable "confluent_bootstrap_servers" {
 }
 
 variable "rds_password" {
-  description = "RDS master password"
+  description = "Password for RDS PostgreSQL"
   type        = string
   sensitive   = true
 }
 
 variable "container_image_producer" {
-  description = "Docker image for order-producer"
+  description = "Container image for order producer service"
   type        = string
-  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/order-producer:latest"
 }
 
 variable "container_image_payment" {
-  description = "Docker image for payment-service"
+  description = "Container image for payment service"
   type        = string
-  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/payment-service:latest"
 }
 
 variable "container_image_fraud" {
-  description = "Docker image for fraud-service"
+  description = "Container image for fraud service"
   type        = string
-  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/fraud-service:latest"
 }
 
 variable "container_image_analytics" {
-  description = "Docker image for analytics-service"
+  description = "Container image for analytics service"
   type        = string
-  default     = "ghcr.io/nadi1993/kafka-enterprise-orders/analytics-service:latest"
 }
 
