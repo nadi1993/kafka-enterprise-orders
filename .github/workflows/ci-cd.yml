@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: us-west-2
   GHCR_REGISTRY: ghcr.io
   TF_WORKING_DIR: infra/terraform
 
