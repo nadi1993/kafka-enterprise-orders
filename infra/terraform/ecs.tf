@@ -291,11 +291,11 @@ resource "aws_ecs_task_definition" "analytics_service" {
       essential = true
 
       environment = [
-        { name = "KAFKA_BROKER",   value = var.confluent_bootstrap_servers },
+        { name = "KAFKA_BROKER", value = var.confluent_bootstrap_servers },
         { name = "PAYMENTS_TOPIC", value = "payments" },
-        { name = "POSTGRES_HOST",  value = aws_db_instance.postgres.address },
-        { name = "POSTGRES_DB",    value = "orders_db" },
-        { name = "POSTGRES_USER",  value = "orders_user" },
+        { name = "POSTGRES_HOST", value = aws_db_instance.postgres.address },
+        { name = "POSTGRES_DB", value = "orders_db" },
+        { name = "POSTGRES_USER", value = "orders_user" },
         { name = "POSTGRES_PASSWORD", value = var.rds_password }
       ]
 
@@ -320,8 +320,8 @@ resource "aws_ecs_service" "analytics_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = [aws_subnet.public_a.id, aws_subnet.public_b.id]
-    security_groups = [aws_security_group.ecs_tasks.id]
+    subnets          = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+    security_groups  = [aws_security_group.ecs_tasks.id]
     assign_public_ip = true
   }
 

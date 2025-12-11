@@ -6,6 +6,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_high" {
   period              = 60
   metric_name         = "CPUUtilization"
   namespace           = "AWS/RDS"
+  statistic           = "Average"
 
   dimensions = {
     DBInstanceIdentifier = aws_db_instance.postgres.id
