@@ -1,0 +1,10 @@
+- name: Install tools for debugging Kafka ecosystem
+  apt:
+    name:
+      - awscli
+      - python3-pip
+      - jq
+      - htop
+      - kafkacat
+    state: present
+    update_cache: yes

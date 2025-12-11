@@ -1,31 +1,42 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import os
+import psycopg2
+import json
+from couchbase.cluster import Cluster, ClusterOptions
+from couchbase.auth import PasswordAuthenticator
+from couchbase.options import ClusterTimeoutOptions
 
 app = FastAPI()
 
-# Разрешаем запросы с фронтенда (Vite / React будет на 5173 порту)
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+COUCHBASE_HOST = os.getenv("COUCHBASE_HOST")
+COUCHBASE_BUCKET = os.getenv("COUCHBASE_BUCKET")
+COUCHBASE_USER = os.getenv("COUCHBASE_USERNAME")
+COUCHBASE_PASS = os.getenv("COUCHBASE_PASSWORD")
 
 
 @app.get("/api/analytics")
 def get_analytics():
-    # Здесь пока фейковые данные, просто чтобы всё работало
-    return {
-        "total_orders": 123,
-        "total_revenue": 45230.75,
-        "successful_payments": 118,
-        "failed_payments": 5,
-        "currency": "USD",
-    }
+    try:
+        cluster = Cluster(
+            f"couchbase://{COUCHBASE_HOST}",
+            ClusterOptions(
+                PasswordAuthenticator(COUCHBASE_USER, COUCHBASE_PASS),
+                timeout_options=ClusterTimeoutOptions(kv_timeout=5)
+            )
+        )
+        bucket = cluster.bucket(COUCHBASE_BUCKET)
+        collection = bucket.default_collection()
+
+        result = cluster.query(
+            f"SELECT * FROM `{COUCHBASE_BUCKET}` LIMIT 10;"
+        )
+
+        orders = [row for row in result]
+        return {"status": "ok", "orders": orders}
+
+    except Exception as e:
+        return {"error": str(e)}
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
 
