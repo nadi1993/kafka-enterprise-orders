@@ -358,3 +358,47 @@ p, span, li, .AppText {
   border: 1px solid rgba(255,255,255,0.18) !important;
   box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
 }
+
+/* ===== LIGHT THEME OVERRIDES (force) ===== */
+.App__overlay,
+.AppOverlay,
+.AppBg,
+.AppBackdrop,
+.AppVignette,
+.overlay,
+.backdrop {
+  opacity: 0.10 !important;
+  filter: none !important;
+}
+
+.App__overlay::before,
+.App__overlay::after {
+  opacity: 0.08 !important;
+  filter: none !important;
+}
+
+body, .App {
+  background-color: #0b1220 !important;
+}
+
+/* ===== LIGHT THEME OVERRIDES (force) ===== */
+.App__overlay,
+.AppOverlay,
+.AppBg,
+.AppBackdrop,
+.AppVignette,
+.overlay,
+.backdrop {
+  opacity: 0.10 !important;
+  filter: none !important;
+}
+
+.App__overlay::before,
+.App__overlay::after {
+  opacity: 0.08 !important;
+  filter: none !important;
+}
+
+body, .App {
+  background-color: #0b1220 !important;
+}
