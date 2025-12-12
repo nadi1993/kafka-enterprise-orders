@@ -313,3 +313,17 @@ body {
   }
 }
 
+
+/* ---------- Brightness tweaks (override) ---------- */
+.AppOverlay {
+  background: rgba(3, 7, 18, 0.45) !important; /* было слишком темно */
+}
+
+.AppBackground {
+  opacity: 0.90 !important;
+  filter: brightness(1.25) saturate(1.10) !important;
+}
+
+.AppText {
+  color: rgba(235, 245, 255, 0.88) !important;
+}
