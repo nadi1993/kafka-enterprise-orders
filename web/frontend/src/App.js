@@ -73,8 +73,7 @@ function App() {
             <article className="AppCard">
               <h3>Order Producer</h3>
               <p className="AppText">
-                Генерирует тестовые заказы и публикует их в Kafka&nbsp;(
-                <code>orders</code> topic).
+                Generates test orders and publishes them to Kafka (<code>orders</code> topic).
               </p>
               <span className="AppTag">Fargate service</span>
             </article>
@@ -82,8 +81,7 @@ function App() {
             <article className="AppCard">
               <h3>Fraud Service</h3>
               <p className="AppText">
-                Читает заказы из Kafka, проверяет на мошенничество и пишет события
-                в&nbsp;<code>fraud-alerts</code>.
+                Consumes orders from Kafka, performs fraud checks, and publishes events to <code>fraud-alerts</code>.
               </p>
               <span className="AppTag AppTag--orange">Fraud checks</span>
             </article>
@@ -91,8 +89,7 @@ function App() {
             <article className="AppCard">
               <h3>Payment Service</h3>
               <p className="AppText">
-                Обрабатывает платежи, обновляет статус заказа и пишет в&nbsp;
-                <code>payments</code>.
+                Processes payments, updates the order status, and publishes events to <code>payments</code>.
               </p>
               <span className="AppTag AppTag--purple">Payments</span>
             </article>
@@ -100,8 +97,7 @@ function App() {
             <article className="AppCard">
               <h3>Analytics Service</h3>
               <p className="AppText">
-                Считает агрегаты по заказам (сумма, статус, количество) и
-                сохраняет в Postgres.
+                Computes order aggregates (amount, status, count) and stores them in Postgres.
               </p>
               <span className="AppTag AppTag--blue">Analytics</span>
             </article>
