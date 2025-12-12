@@ -60,3 +60,8 @@ variable "container_image_analytics" {
   default     = "ghcr.io/nadi1993/kafka-enterprise-orders/analytics-service:latest"
 }
 
+
+variable "container_image_web_backend" {
+  type        = string
+  description = "Container image for web-backend (nginx serving React build)"
+}

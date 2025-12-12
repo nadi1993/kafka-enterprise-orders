@@ -16,3 +16,11 @@ output "ecs_cluster_name" {
 output "db_endpoint" {
   value = aws_db_instance.postgres.address
 }
+
+output "alb_dns_name" {
+  value = aws_lb.app.dns_name
+}
+
+output "alb_url" {
+  value = "http://${aws_lb.app.dns_name}"
+}

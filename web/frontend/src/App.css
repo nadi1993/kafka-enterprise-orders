@@ -63,7 +63,7 @@ body {
     rgba(129, 140, 248, 0.7),
     rgba(56, 189, 248, 0)
   );
-  opacity: 0.7;
+ 
   filter: blur(52px);
   z-index: -1;
   pointer-events: none;
