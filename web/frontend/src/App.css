@@ -49,7 +49,7 @@ body {
   padding: 3.5rem 1.5rem 3rem;
 }
 
-/* красивый «блик» на фоне */
+/* subtle background glow */
 .App__overlay::before {
   content: "";
   position: fixed;
@@ -163,7 +163,7 @@ body {
   gap: 1.75rem;
 }
 
-/* Большая карточка */
+/* Large card */
 
 .AppCard {
   background: var(--card-bg);
@@ -190,7 +190,7 @@ body {
   line-height: 1.55;
 }
 
-/* key-value блоки */
+/* key-value blocks */
 
 .AppGrid {
   display: grid;
@@ -233,7 +233,7 @@ body {
   font-size: 0.85rem;
 }
 
-/* четыре маленькие карточки */
+/* four small cards */
 
 .AppCardsRow {
   display: grid;
@@ -291,7 +291,7 @@ body {
   color: #f97316;
 }
 
-/* Адаптивность */
+/* Responsive */
 
 @media (max-width: 768px) {
   .App__overlay {
